@@ -1,0 +1,21 @@
+{
+  "scripts": {
+    "start": "babel-node src/index.js"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.2.2",
+    "@babel/node": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
+    "babel-plugin-dynamic-import-node": "^2.2.0"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^0.2.3",
+    "@tensorflow/tfjs-node-gpu": "^0.2.3",
+    "babel-loader": "^8.0.5",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "request-promise-native": "^1.0.5",
+    "webpack": "^4.28.4"
+  }
+}
