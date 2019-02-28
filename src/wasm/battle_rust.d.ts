@@ -8,6 +8,8 @@ free(): void;
 
  get_update(arg0: number): void;
 
+ reset(): void;
+
  on_event(arg0: Uint16Array): void;
 
 }

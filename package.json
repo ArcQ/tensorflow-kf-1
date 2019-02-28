@@ -1,6 +1,8 @@
 {
   "scripts": {
-    "start": "babel-node src/index.js"
+    "pre-start": "cp ../kf-1/js/src/game/scenes/level-one/setup.js ./src/setup.js",
+    "start": "babel-node --expose-wasm src/index.js",
+    "lint": "eslint ./src"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -11,11 +13,11 @@
   },
   "dependencies": {
     "@tensorflow/tfjs-node": "^0.2.3",
-    "@tensorflow/tfjs-node-gpu": "^0.2.3",
     "babel-loader": "^8.0.5",
     "request": "^2.88.0",
     "request-promise": "^4.2.2",
     "request-promise-native": "^1.0.5",
+    "uuid": "^3.3.2",
     "webpack": "^4.28.4"
   }
 }

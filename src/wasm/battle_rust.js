@@ -204,6 +204,12 @@ class LevelOne {
         return wasm.levelone_get_update(this.ptr, arg0);
     }
     /**
+    * @returns {void}
+    */
+    reset() {
+        return wasm.levelone_reset(this.ptr);
+    }
+    /**
     * @param {Uint16Array} arg0
     * @returns {void}
     */
