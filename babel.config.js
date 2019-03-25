@@ -9,5 +9,12 @@ module.exports = {
       },
     ],
   ],
-  plugins: ['@babel/plugin-syntax-dynamic-import', '@babel/plugin-transform-regenerator'],
+  plugins: [
+    '@babel/plugin-syntax-dynamic-import',
+  ],
+  env: {
+    test: {
+      plugins: ['dynamic-import-node']
+    }
+  }
 };

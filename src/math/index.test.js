@@ -1,4 +1,4 @@
-import { choose } from './index';
+import { calcDistance, getDivisions, choose } from './index';
 
 test('random at 0.5 should work properly', () => {
   const mockMath = Object.create(global.Math);
@@ -17,4 +17,12 @@ test('random at 0.95 should work properly', () => {
 
   expect(choose([0, 1, 2], [0.1, 0.8, 0.1])).toBe(2);
   expect(choose([0, 1, 2, 3, 4], [0.55, 0.15, 0.2, 0.04, 0.06])).toBe(4);
+});
+
+test('calcDistance [3,4], [6,8] should be 5', () => {
+  expect(calcDistance([3, 4], [6, 8])).toBe(5);
+});
+
+test('getDivisions(3) should return 16', () => {
+  expect(getDivisions(3)).toBe(16);
 });

@@ -1,16 +1,24 @@
 import * as tf from '@tensorflow/tfjs-node';
 import {
   mean,
-  mapAccum,
+  range,
   map,
   scan,
   pipe,
   flatten,
   tail,
   reverse,
-  range,
+  compose,
+  pair,
+  fromPairs,
+  concat,
 } from 'ramda';
+import { resetState } from 'deep-learning/helpers';
 import { std } from 'mathjs';
+import config from 'config';
+import { getPointF } from '../run-utils';
+
+const getPoint = getPointF(config);
 
 export async function discountAndNormalizeRewards(episodeRewards, gamma) {
   const normalize = (arr) => {
@@ -34,92 +42,73 @@ export async function discountAndNormalizeRewards(episodeRewards, gamma) {
   )(rewardsArr);
 }
 
-function connectLayers(inputLayer) {
-  return mapAccum(
-    (prevLayer, layer) => {
-      const connectedLayer = layer.apply(prevLayer);
-      return [connectedLayer, connectedLayer];
-    },
-    inputLayer,
-  );
-}
-
-
-function createTrainingNets(n, inputLayer) {
-  const createSet = () => [
-    tf.layers.reLU(),
-    tf.layers.batchNormalization({
-      training: true,
-      epsilon: 1 ** -5,
-    }),
-    tf.layers.elu(),
-  ];
-
-  return pipe(
-    range,
-    map(createSet),
-    flatten,
-    connectLayers(inputLayer),
-  )(n);
-}
-
-const NUMBER_TRAINING_NETS = 3;
-
-export function createPgNetwork(stateSize, actionSize, learningRate) {
-  // const inputs = tf.variable(tf.tensor(inputPlaceholder), false, 'inputs', 'float32');
-  // const actions = tf.variable(tf.tensor(inputPlaceholder), false, 'actions', 'float32');
-  // const discountedEpisodeRewards = tf.variable(tf.scalar(0), true, 'discountedEpisodeRewards', 'float32');
-  // const mean_reward = tf.variable(tf.scalar(0), true, 'meanReward', 'float32');
-  const inputLayer = tf.input({ shape: [stateSize] });
-  const [lastLayer] = createTrainingNets(NUMBER_TRAINING_NETS, inputLayer);
-
-  const flattenLayer = tf.layers.flatten();
-
-  const fcOne = tf.layers.dense({
-    activation: 'elu',
-    units: 512,
-    kernelInitializer: 'glorotNormal',
-  });
-
-  const logits = tf.layers.dense({
-    kernelInitializer: 'glorotNormal',
-    units: 15,
-  });
-
-  const [logitLayer] = connectLayers(lastLayer)([
-    flattenLayer,
-    fcOne,
-    logits]);
-
-  const model = tf.model({ inputs: inputLayer, outputs: logitLayer });
-
-  const optimizer = tf.train.rmsprop(learningRate);
-
-  return {
-    train(inputs) {
-      const output = model(inputs);
-      const [xLogits, yLogits, scores] = tf.split(output, 3);
-      return {
-        posLogits: tf.stack([xLogits, yLogits]),
-        actionDistribution: tf.softmax(scores),
-      };
-    },
-    propagate() {
-      optimizer.minimize(() => {
-        const output = model();
-        const [xLogits, yLogits, scores] = tf.split(output, 3);
-        const posLogits = tf.stack([xLogits, yLogits]);
-
-        const actionDistribution = tf.softmax(scores);
-
-        const negLogProb = tf.losses.softmaxCrossEntropy({
-          logits: actionDistribution,
-          labels: posLogits,
-        });
-        const loss = tf.mean(tf.mul(negLogProb, discountedEpisodeRewards));
-        loss.data().then(l => console.log('Loss', l));
-        return loss;
-      })
-    }
+export async function runEpisode(PgNetwork, game) {
+  game.reset(resetState);
+  const episodeState = [];
+  const episodeActions = [];
+  const episodeRewards = [];
+  let finished = false;
+  while (!finished) {
+    const { action, scores } = PgNetwork.run(
+      tf.tensor(concat(game.state.P1.pos, game.state.P2.pos)),
+    );
+    // TODO need to calculate reward, maybe by merging in a
+    // stream of events after action occured? 500ms?
+    const nextPos = getPoint(playerOne.pos, action);
+    playerOne.setPos(nextPos);
+    finished = game.isEpisodeFinished();
+    episodeState.push(state);
+    episodeActions.push(action);
+    episodeRewards.push(reward);
   }
+  return { episodeState, episodeActions, episodeRewards };
+}
+
+const objWithKeys = compose(
+  map(v => pair(v, [])),
+  fromPairs(),
+);
+
+const fps = 30;
+
+export function runBatch() {
+  const batchData = objWithKeys(['states', 'actions', 'rewards', 'discountedRewards']);
+  let batchCount = 0;
+  const game = createGame(resetState, fps);
+  const playerOne = game.createPlayer('P1');
+  const playerTwo = game.createPlayer('P2');
+
+  const PgNetwork = createPgNetwork(config.stateSize, config.actionSize, config.learningRate);
+  let episodeNum = 1;
+
+  const getGradientsAndSaveActions = (inputTensor) => {
+    const f = () => tf.tidy(() => {
+      const [logits, actions] = this.getLogitsAndActions(inputTensor);
+      this.currentActions_ = actions.dataSync();
+      const labels =
+        tf.sub(1, tf.tensor2d(this.currentActions_, actions.shape));
+      return tf.losses.sigmoidCrossEntropy(labels, logits).asScalar();
+    });
+    return tf.variableGrads(f);
+  }
+
+  while (batchCount <= config.batchSize) {
+    const { episodeStates, episodeActions, episodeRewards } = runEpisode(PgNetwork, game);
+    batchData.states.push(episodeStates);
+    batchData.rewards.push(episodeRewards);
+    batchCount += tf.size(episodeRewards);
+    batchData.discountedRewards.push(
+      discountAndNormalizeRewards(episodeRewards),
+    );
+    episodeNum += 1;
+    game.reset();
+  }
+
+  return [
+    tf.stack(tf.tensor(batchData.states)),
+    tf.stack(tf.tensor(batchData.actions)),
+    tf.tensor(flatten(batchData.rewards)),
+    tf.tensor(flatten(batchData.discountedRewards)),
+    episodeNum,
+  ];
 }

@@ -1,6 +1,5 @@
-import 'babel-polyfill';
 import * as tf from '@tensorflow/tfjs-node';
-import { discountAndNormalizeRewards } from './index';
+import { discountAndNormalizeRewards } from 'deep-learning/policy-gradients';
 
 test('should discount and normalize rewards', async () => {
   const discountedR = await discountAndNormalizeRewards(tf.tensor([4, 3, 5]), 0.9);
