@@ -1,11 +1,10 @@
 import * as rp from 'request-promise';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import {
   take,
   delay,
   toArray,
   tap,
-  share,
 } from 'rxjs/operators';
 import encoder from 'kf-game-engine/encoder';
 import createWasmGame from 'kf-game-engine/wasm-game';
@@ -24,14 +23,13 @@ export const newPlayer = (k, onEvent) => ({
   ]),
 });
 
-function stateParser([state, stateDiffByte]) {
-  const _state = state;
+function stateParser([{ ...state }, stateDiffByte]) {
   const spritePosOnChange = {
     P1: (pos) => {
-      _state.P1.pos = pos;
+      state.P1.pos = pos;
     },
     P2: (pos) => {
-      _state.P2.pos = pos;
+      state.P2.pos = pos;
     },
   };
   const stateUpdateHandler = {
@@ -44,17 +42,7 @@ function stateParser([state, stateDiffByte]) {
     },
   };
   levelOneEncoder.decodeByteArray(stateUpdateHandler)(stateDiffByte);
-  return _state;
-}
-
-function createObservable(observerHandler) {
-  const obs$ = Observable.create((_observer) => {
-    observerHandler.setObserver(_observer);
-  }).pipe(tap());
-
-  return {
-    obs$,
-  };
+  return state;
 }
 
 export async function startGame({ ...state }, onTick, fps) {
@@ -62,22 +50,7 @@ export async function startGame({ ...state }, onTick, fps) {
   const wasmBindgen = await import('./wasm/battle_rust.js');
   const wasm = await import('./wasm/battle_rust_bg.js');
 
-  const observerHandler = {
-    observer: undefined,
-    setObserver: (observer) => {
-      console.log(observer);
-      this.observer = observer;
-    },
-    onWasmStateChange: (stateDiff) => {
-      this.observer.next(stateDiff);
-    },
-  };
-
-  // const { obs$ } = createObservable(observerHandler);
-  const gameStateSubject = new BehaviorSubject();
-
-  const wasmStateChange$ = gameStateSubject.pipe(
-  );
+  const gameStateSubject = new BehaviorSubject(state);
 
   const {
     wasmInterface,
@@ -88,11 +61,8 @@ export async function startGame({ ...state }, onTick, fps) {
       const curState = gameStateSubject.value;
       const stateObj = [curState, stateDiff];
       onTick(stateObj);
-      gameStateSubject.next(stateObj);
-      setTimeout(
-        wasmInterface.toWasm.onTick(60 / (fps * 1000)),
-        500,
-      )
+      const nextState = stateParser(stateObj);
+      gameStateSubject.next(nextState);
     },
     fps,
     wasmConfig: {
@@ -112,7 +82,10 @@ export async function startGame({ ...state }, onTick, fps) {
     nextTicks: (n) => {
       // can toPromise, subsribe, apply operators etc.
       const p = gameStateSubject.pipe(
+        delay(5),
+        tap(() => wasmInterface.toWasm.onTick(60 / (fps * 1000))),
         take(n),
+        toArray(),
       ).toPromise();
 
       wasmInterface.toWasm.onTick(60 / (fps * 1000));
@@ -136,30 +109,11 @@ export async function createGame(resetState, fps) {
   return {
     nextTick,
     createPlayer,
-    reset: (resetState) => {
+    reset: () => {
       this.state = resetState();
       reset(this.state);
     },
     state,
     isEpisodeFinished,
   };
-  // setInterval(() => console.log(state), 1000);
-  // const episodes = 10;
-  //
-  // Array(episodes).fill().map((_, i) => {
-  //   if (i > 0) {
-  //     reset();
-  //     state = initialState;
-  //   }
-  //   img = state.screen_buffer;
-  //   misc = state.game_variables;
-  //   action = random.choice(actions);
-  //   print(action);
-  //   reward = game.make_action(action);
-  //   print('\treward:', reward);
-  //   time.sleep(0.02);
-  //   print('Result:', game.get_total_reward());
-  //   time.sleep(2);
-  //   game.close();
-  // });
 }

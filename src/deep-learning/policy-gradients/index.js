@@ -1,7 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 import {
   mean,
-  range,
   map,
   scan,
   pipe,
@@ -70,6 +69,10 @@ const objWithKeys = compose(
 );
 
 const fps = 30;
+
+export function calculateRewards() {
+  return ;
+}
 
 export function runBatch() {
   const batchData = objWithKeys(['states', 'actions', 'rewards', 'discountedRewards']);

@@ -13,10 +13,10 @@ export const setRandPos = setRandPosF(config);
 export function resetState() {
   // TODO, state should include whether idle or moving, and if moving, point of movement
   return {
-    goblin: {
+    P1: {
       pos: setRandPos(),
     },
-    assasin: {
+    P2: {
       pos: setRandPos(),
     },
     moveTargetCircle: {

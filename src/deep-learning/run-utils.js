@@ -1,5 +1,6 @@
 import {
   range,
+  mean,
   sum,
   pipe,
   zip,
@@ -51,21 +52,43 @@ export function setRandPosF({ screenSizes }) {
 
 export const [ZERO, D1, D2, FAR] = range(0, 4);
 
-export function getDistance(d1, d2) {
+export function getDistance([d1, d2]) {
   const dist = calcDistance(d1, d2);
-  if (dist < 200) {
-    return D2;
+  if (dist < 20) {
+    return ZERO;
   }
   if (dist < 100) {
     return D1;
   }
-  if (dist < 20) {
-    return ZERO;
+  if (dist < 200) {
+    return D2;
   }
   return FAR;
 }
 
-export async function calculateReward(game) {
-  const rewardStack = 3;
-  await nextTick(rewardStack);
+const rewardDict = {
+  [ZERO]: 0,
+  [D1]: 950,
+  [D2]: 995,
+  [FAR]: 999,
+};
+
+/**
+ * calculateReward
+ *
+ * @param game
+ * @param rewardStack - 3
+ * @param keys - ['P1', 'P2']
+ * @returns {number}
+ */
+export async function calculateReward(game, rewardStack, charKeys) {
+  const lastThreeStates = await game.nextTick(rewardStack);
+  return pipe(
+    map(state => pipe(
+      map(charKey => state[charKey].pos),
+      getDistance,
+      distType => rewardDict[distType],
+    )(charKeys)),
+    mean,
+  )(lastThreeStates);
 }
