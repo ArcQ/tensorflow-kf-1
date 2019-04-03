@@ -1,4 +1,7 @@
-import * as tf from '@tensorflow/tfjs-node';
+import createPgNetwork from './createPgNetwork';
+
+import { createGame } from '../../game';
+
 import {
   mean,
   map,
@@ -12,10 +15,13 @@ import {
   fromPairs,
   concat,
 } from 'ramda';
-import { resetState } from 'deep-learning/helpers';
 import { std } from 'mathjs';
+import * as tf from '@tensorflow/tfjs-node';
+
+import { resetState } from 'deep-learning/helpers';
 import config from 'config';
-import { getPointF } from '../run-utils';
+
+import { calculateReward, getPointF } from '../run-utils';
 
 const getPoint = getPointF(config);
 
@@ -54,6 +60,8 @@ export async function runEpisode(PgNetwork, game) {
     // TODO need to calculate reward, maybe by merging in a
     // stream of events after action occured? 500ms?
     const nextPos = getPoint(playerOne.pos, action);
+    const rewardStack = 3;
+    const reward = await calculateReward(game, rewardStack, ['P1', 'P2']); //eslint-disable-line
     playerOne.setPos(nextPos);
     finished = game.isEpisodeFinished();
     episodeState.push(state);
@@ -69,10 +77,6 @@ const objWithKeys = compose(
 );
 
 const fps = 30;
-
-export function calculateRewards() {
-  return ;
-}
 
 export function runBatch() {
   const batchData = objWithKeys(['states', 'actions', 'rewards', 'discountedRewards']);

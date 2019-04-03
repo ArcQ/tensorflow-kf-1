@@ -74,7 +74,7 @@ const rewardDict = {
 };
 
 /**
- * calculateReward
+ * calculateReward - game will also tick that number of times in rewardStack
  *
  * @param game
  * @param rewardStack - 3

@@ -1,6 +1,5 @@
 import 'babel-polyfill';
 import * as rp from 'request-promise';
-import { mean } from 'ramda';
 import { resetState } from 'deep-learning/helpers';
 import { startGame } from './index';
 
@@ -18,5 +17,4 @@ test('game can start, and call next tick correctly', async () => {
   p1.setPos([30, 30]);
   const nextThreeStates = await game.nextTicks(3);
   expect(nextThreeStates).toEqual(actualStates);
-  // expect(mean(nextThreeStates)).toEqual(10);
 }, 10000);

@@ -96,7 +96,7 @@ export async function startGame({ ...state }, onTick, fps) {
 }
 
 export async function createGame(resetState, fps) {
-  const onTick = nextState => console.log(nextState);
+  const onTick = () => {};
   const {
     nextTick,
     createPlayer,
