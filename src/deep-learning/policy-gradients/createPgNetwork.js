@@ -1,22 +1,29 @@
 import * as tf from '@tensorflow/tfjs-node';
 
 import {
+  last,
   map,
   mapAccum,
   pipe,
   flatten,
   range,
+  insert,
 } from 'ramda';
 
 const NUMBER_TRAINING_NETS = 3;
 
 function connectLayers(inputLayer) {
-  return mapAccum(
-    (prevLayer, layer) => {
-      const connectedLayer = layer.apply(prevLayer);
-      return [connectedLayer, connectedLayer];
-    },
-    inputLayer,
+  return pipe(
+    insert(0, inputLayer),
+    mapAccum(
+      (prevLayer, layer) => {
+        const connectedLayer = prevLayer
+          ? layer.apply(prevLayer)
+          : layer;
+        return [connectedLayer, connectedLayer];
+      },
+      undefined,
+    ),
   );
 }
 
@@ -38,10 +45,14 @@ function createTrainingNets(n, inputLayer) {
   )(n);
 }
 
-export default function createPgNetwork({ stateSize, actionSize, learningRate }) {
+export default function createPgNetwork({
+  numTrainingNets,
+  stateSize,
+  actionSize,
+  learningRate
+}) {
   const inputLayer = tf.input({ shape: [stateSize] });
-  const [lastLayer] = createTrainingNets(NUMBER_TRAINING_NETS, inputLayer);
-
+  const [lastTrainingLayer] = createTrainingNets(numTrainingNets, inputLayer);
   const flattenLayer = tf.layers.flatten();
 
   const fcOne = tf.layers.dense({
@@ -55,8 +66,7 @@ export default function createPgNetwork({ stateSize, actionSize, learningRate })
     units: 15,
   });
 
-  const [logitLayer] = connectLayers(lastLayer)([
-    flattenLayer,
+  const [logitLayer] = connectLayers(lastTrainingLayer)([
     fcOne,
     logits]);
 
@@ -72,16 +82,17 @@ export default function createPgNetwork({ stateSize, actionSize, learningRate })
   return {
     run(inputs) {
       const scores = model(inputs);
+      const negLogProb = tf.losses.softmaxCrossEntropy(getActionEye(action), scores);
       return {
         action: tf.multinomial(scores, 1),
         scores,
+        negLogProb,
       };
     },
-    optimize(scores, discountedEpisodeRewards, action) {
+    optimize(negLogProbs, discountedEpisodeRewards) {
       tf.tidy(() =>
         optimizer.minimize(() => {
-          const negLogProb = tf.losses.softmaxCrossEntropy(getActionEye(action), scores);
-          return tf.mean(tf.mul(negLogProb, discountedEpisodeRewards));
+          return tf.mean(tf.mul(negLogProbs, discountedEpisodeRewards));
         }));
     },
   };

@@ -68,7 +68,7 @@ export async function startGame({ ...state }, onTick, fps) {
     wasmConfig: {
       name: 'LevelOne',
       encoderKeys,
-      initConfig: { ...JSON.parse(res) },
+      initConfig: JSON.parse(res),
     },
   });
 
@@ -98,7 +98,7 @@ export async function startGame({ ...state }, onTick, fps) {
 export async function createGame(resetState, fps) {
   const onTick = () => {};
   const {
-    nextTick,
+    nextTicks,
     createPlayer,
     reset,
     state,
@@ -107,7 +107,7 @@ export async function createGame(resetState, fps) {
   const isEpisodeFinished = () => getDistance(state.P1.pos, state.P2.pos) === ZERO;
 
   return {
-    nextTick,
+    nextTicks,
     createPlayer,
     reset: () => {
       this.state = resetState();

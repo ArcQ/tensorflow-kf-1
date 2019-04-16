@@ -21,14 +21,18 @@ function getActionSize() {
 }
 
 export default {
+  type: 'PG',
   projectId: uuid(),
   learningRate,
   screenSizes: trainedScreenSizes,
   actionDistance: 10,
+  numTrainingNets: 3,
   stateSize: getPosStateSize(),
   actionSize: getActionSize(),
   allowedDirections,
-  numEpochs: 1000,
+  // numEpochs: 1000,
+  numEpochs: 10,
+  fps: 30,
   batchSize: 1000, // Each 1 is a timestep (NOT AN EPISODE) # YOU CAN CHANGE TO 5000 if you have GPU
   gamma: 0.99,
   training: false,
