@@ -6,9 +6,9 @@ import {
   tail,
   reverse,
   compose,
-  pair,
   fromPairs,
   concat,
+  flatten,
 } from 'ramda';
 import { std } from 'mathjs';
 import * as tf from '@tensorflow/tfjs-node';
@@ -20,13 +20,12 @@ import { calculateReward, getPointF } from '../run-utils';
 
 const getPoint = getPointF(config);
 
-export async function discountAndNormalizeRewards(episodeRewards, gamma) {
+export async function discountAndNormalizeRewards(rewardsArr, gamma) {
   const normalize = (arr) => {
     const meanReward = mean(arr);
     const stdReward = std(arr);
     return arr.map(v => (v - meanReward) / stdReward);
   };
-  const rewardsArr = await episodeRewards.array();
 
   return pipe(
     reverse,
@@ -43,24 +42,25 @@ export async function discountAndNormalizeRewards(episodeRewards, gamma) {
 }
 
 const objWithKeys = compose(
-  map(v => pair(v, [])),
   fromPairs(),
+  map(v => [v, []]),
 );
 
 export async function runEpisode(runModel, game, players) {
   game.reset(resetState);
   const episodeData = objWithKeys(['actions', 'rewards', 'negLogProbs']);
   const rewardStack = 3;
-  const maxEpisodeL = 500;
 
   while (!game.isEpisodeFinished()
-    && episodeData.actions.length < maxEpisodeL) {
+    && episodeData.actions.length < config.maxEpisodeL) {
+    console.log(episodeData.actions.length);
     const { action, negLogProb } = runModel(
-      tf.tensor(concat(game.state.P1.pos, game.state.P2.pos)),
+      tf.tensor2d([concat(game.state.P1.pos, game.state.P2.pos)]),
     );
     const nextPos = getPoint(game.state.P1.pos, action);
     players[0].setPos(nextPos);
     const reward = await calculateReward(game, rewardStack, ['P1', 'P2']); //eslint-disable-line
+    episodeData.rewards.push(reward);
     episodeData.actions.push(action);
     episodeData.negLogProbs.push(negLogProb);
   }
@@ -73,14 +73,13 @@ export async function runEpisode(runModel, game, players) {
 
 export async function runBatch(game, runModel) {
   const batchData = objWithKeys(['actions', 'discountedRewards', 'negLogProbs']);
-  console.log(game);
   const players = [game.createPlayer('P1'), game.createPlayer('P2')];
 
   let episodeCount = 1;
 
-  while (concat(batchData.negLogProbs).length <= config.batchSize) {
-    const episodeData = await runEpisode(runModel, game, players);
-    ['states', 'negLogProbs', 'discountedRewards'].map(k =>
+  while (flatten(batchData.negLogProbs).length <= config.batchSize) {
+    const episodeData = await runEpisode(runModel, game, players); //eslint-disable-line
+    ['negLogProbs', 'discountedRewards'].map(k =>
       batchData[k].push(episodeData[k]));
     episodeCount += 1;
     game.reset();

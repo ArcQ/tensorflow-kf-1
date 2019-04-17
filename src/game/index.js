@@ -109,9 +109,10 @@ export async function createGame(resetState, fps) {
   return {
     nextTicks,
     createPlayer,
-    reset: () => {
-      this.state = resetState();
-      reset(this.state);
+    reset() {
+      // this.state = resetState();
+      // reset(this.state);
+      // reset();
     },
     state,
     isEpisodeFinished,

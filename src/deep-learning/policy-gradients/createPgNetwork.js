@@ -30,11 +30,11 @@ function connectLayers(inputLayer) {
 function createTrainingNets(n, inputLayer) {
   const createSet = () => [
     tf.layers.reLU(),
-    tf.layers.batchNormalization({
-      training: true,
-      epsilon: 1 ** -5,
-    }),
-    tf.layers.elu(),
+    // tf.layers.batchNormalization({
+    //   training: true,
+    //   epsilon: 1 ** -5,
+    // }),
+    // tf.layers.elu(),
   ];
 
   return pipe(
@@ -49,21 +49,23 @@ export default function createPgNetwork({
   numTrainingNets,
   stateSize,
   actionSize,
-  learningRate
+  learningRate,
+  batchSize,
 }) {
   const inputLayer = tf.input({ shape: [stateSize] });
-  const [lastTrainingLayer] = createTrainingNets(numTrainingNets, inputLayer);
-  const flattenLayer = tf.layers.flatten();
+  const [lastTrainingLayer, ls] = createTrainingNets(numTrainingNets, inputLayer);
 
   const fcOne = tf.layers.dense({
     activation: 'elu',
-    units: 512,
+    units: 40,
+    inputShape: [4],
     kernelInitializer: 'glorotNormal',
   });
 
   const logits = tf.layers.dense({
     kernelInitializer: 'glorotNormal',
-    units: 15,
+    inputShape: [40],
+    units: actionSize,
   });
 
   const [logitLayer] = connectLayers(lastTrainingLayer)([
@@ -81,15 +83,21 @@ export default function createPgNetwork({
 
   return {
     run(inputs) {
-      const scores = model(inputs);
-      const negLogProb = tf.losses.softmaxCrossEntropy(getActionEye(action), scores);
+      const scores = model.apply(inputs, { training: true });
+      // const scores = model.predict(tf.tensor2d([[0,0,0,0]]));
+      const action = tf.multinomial(scores, 1);
+      const negLogProb = tf.losses.softmaxCrossEntropy(
+        getActionEye(action).squeeze(),
+        scores.squeeze(),
+      );
       return {
-        action: tf.multinomial(scores, 1),
+        action,
         scores,
         negLogProb,
       };
     },
     optimize(negLogProbs, discountedEpisodeRewards) {
+      console.log(arguments);
       tf.tidy(() =>
         optimizer.minimize(() => {
           return tf.mean(tf.mul(negLogProbs, discountedEpisodeRewards));

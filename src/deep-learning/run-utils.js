@@ -82,7 +82,7 @@ const rewardDict = {
  * @returns {number}
  */
 export async function calculateReward(game, rewardStack, charKeys) {
-  const lastThreeStates = await game.nextTick(rewardStack);
+  const lastThreeStates = await game.nextTicks(rewardStack);
   return pipe(
     map(state => pipe(
       map(charKey => state[charKey].pos),

@@ -31,9 +31,10 @@ export default {
   actionSize: getActionSize(),
   allowedDirections,
   // numEpochs: 1000,
-  numEpochs: 10,
+  numEpochs: 1,
+  maxEpisodeL: 20,
   fps: 30,
-  batchSize: 1000, // Each 1 is a timestep (NOT AN EPISODE) # YOU CAN CHANGE TO 5000 if you have GPU
+  batchSize: 40, // Each 1 is a timestep (NOT AN EPISODE) # YOU CAN CHANGE TO 5000 if you have GPU
   gamma: 0.99,
   training: false,
 };
