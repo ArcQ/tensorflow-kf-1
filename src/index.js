@@ -1,4 +1,4 @@
-import { range } from 'ramda';
+import { repeat } from 'ramda';
 
 import { createGame } from 'game';
 import { resetState } from 'deep-learning/helpers';
@@ -14,10 +14,11 @@ function logStatistics(batchData) {
 }
 
 function print(data) {
-  const divider = range(10).fill('-').join();
+  const divider = repeat('-', 15).join(' ');
   console.info(divider); //eslint-disable-line
-  data.entries.map(([k, v]) => console.info(`${k}: ${v}`)); //eslint-disable-line
+  Object.entries(data).map(([k, v]) => console.info(`${k}: ${v}`)); //eslint-disable-line
   console.info(divider); //eslint-disable-line
+  console.info(''); //eslint-disable-line
 }
 
 async function train() {
@@ -29,7 +30,7 @@ async function train() {
       const batch = await runBatch(game, PgNetwork.run);
       logStatistics(batch.batchData);
 
-      PgNetwork.optimize(batch.batchData.negLogProbs, batch.batchData.discountedRewards);
+      PgNetwork.optimize(batch.batchData.gradients, batch.batchData.discountedRewards);
       print({ epoch });
       epoch += 1;
     }

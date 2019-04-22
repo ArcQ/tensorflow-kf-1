@@ -20,7 +20,7 @@ import { calculateReward, getPointF } from '../run-utils';
 
 const getPoint = getPointF(config);
 
-export async function discountAndNormalizeRewards(rewardsArr, gamma) {
+export function discountAndNormalizeRewards(rewardsArr, gamma) {
   const normalize = (arr) => {
     const meanReward = mean(arr);
     const stdReward = std(arr);
@@ -53,7 +53,6 @@ export async function runEpisode(runModel, game, players) {
 
   while (!game.isEpisodeFinished()
     && episodeData.actions.length < config.maxEpisodeL) {
-    console.log(episodeData.actions.length);
     const { action, negLogProb } = runModel(
       tf.tensor2d([concat(game.state.P1.pos, game.state.P2.pos)]),
     );

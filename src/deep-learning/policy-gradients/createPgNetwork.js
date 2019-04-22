@@ -56,7 +56,7 @@ export default function createPgNetwork({
   const [lastTrainingLayer, ls] = createTrainingNets(numTrainingNets, inputLayer);
 
   const fcOne = tf.layers.dense({
-    activation: 'elu',
+    activation: 'relu',
     units: 40,
     inputShape: [4],
     kernelInitializer: 'glorotNormal',
@@ -83,25 +83,33 @@ export default function createPgNetwork({
 
   return {
     run(inputs) {
-      const scores = model.apply(inputs, { training: true });
+      // const scores = model.apply(inputs, { training: true });
       // const scores = model.predict(tf.tensor2d([[0,0,0,0]]));
-      const action = tf.multinomial(scores, 1);
-      const negLogProb = tf.losses.softmaxCrossEntropy(
-        getActionEye(action).squeeze(),
-        scores.squeeze(),
-      );
+      const f = () => tf.tidy(() => {
+        const scores = model.predict(inputs);
+        const action = tf.multinomial(scores, 1);
+        const a = tf.losses.softmaxCrossEntropy(
+          getActionEye(action).squeeze(),
+          scores.squeeze(),
+        ).asScalar();
+        return a;
+      });
+      const gradients = tf.variableGrads(f);
+
       return {
-        action,
-        scores,
-        negLogProb,
+        // action,
+        // scores,
+        gradients,
       };
     },
-    optimize(negLogProbs, discountedEpisodeRewards) {
-      console.log(arguments);
+    optimize(gradients, discountedEpisodeRewards) {
       tf.tidy(() =>
-        optimizer.minimize(() => {
-          return tf.mean(tf.mul(negLogProbs, discountedEpisodeRewards));
-        }));
+        optimizer.applyGradients(() =>
+          tf.mean(tf.mul(
+            tf.concat(gradients),
+            tf.concat(discountedEpisodeRewards),
+          )),
+        ));
     },
   };
 }
