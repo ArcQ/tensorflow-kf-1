@@ -2,10 +2,12 @@ import {
   range,
   mean,
   sum,
+  repeat,
   pipe,
   zip,
   map,
 } from 'ramda';
+import fs from 'fs';
 import * as tf from '@tensorflow/tfjs-node';
 import { calcDistance } from 'math';
 
@@ -91,4 +93,17 @@ export async function calculateReward(game, rewardStack, charKeys) {
     )(charKeys)),
     mean,
   )(lastThreeStates);
+}
+
+export function logStatistics(fileName, data) {
+  fs.appendFile(`data/${fileName}.json`, JSON.stringify(data),
+    err => err ? console.error(err) : console.log('stats saved'));
+}
+
+export function pprint(data) {
+  const divider = repeat('-', 15).join(' ');
+  console.info(divider); //eslint-disable-line
+  Object.entries(data).map(([k, v]) => console.info(`${k}: ${v}`)); //eslint-disable-line
+  console.info(divider); //eslint-disable-line
+  console.info(''); //eslint-disable-line
 }

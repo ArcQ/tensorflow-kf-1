@@ -50,10 +50,9 @@ export default function createPgNetwork({
   stateSize,
   actionSize,
   learningRate,
-  batchSize,
 }) {
   const inputLayer = tf.input({ shape: [stateSize] });
-  const [lastTrainingLayer, ls] = createTrainingNets(numTrainingNets, inputLayer);
+  const [lastTrainingLayer] = createTrainingNets(numTrainingNets, inputLayer);
 
   const fcOne = tf.layers.dense({
     activation: 'relu',
@@ -85,20 +84,19 @@ export default function createPgNetwork({
     run(inputs) {
       // const scores = model.apply(inputs, { training: true });
       // const scores = model.predict(tf.tensor2d([[0,0,0,0]]));
+      let recordedAction = null;
       const f = () => tf.tidy(() => {
         const scores = model.predict(inputs);
         const action = tf.multinomial(scores, 1);
-        const a = tf.losses.softmaxCrossEntropy(
+        recordedAction = Array.from(action.dataSync());
+        return tf.losses.softmaxCrossEntropy(
           getActionEye(action).squeeze(),
           scores.squeeze(),
         ).asScalar();
-        return a;
       });
       const gradients = tf.variableGrads(f);
-
       return {
-        // action,
-        // scores,
+        action: recordedAction[0],
         gradients,
       };
     },

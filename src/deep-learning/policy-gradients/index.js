@@ -10,13 +10,22 @@ import {
   concat,
   flatten,
 } from 'ramda';
+
+import { createGame } from 'game';
 import { std } from 'mathjs';
 import * as tf from '@tensorflow/tfjs-node';
 import { resetState } from 'deep-learning/helpers';
 
 import config from 'config';
 
-import { calculateReward, getPointF } from '../run-utils';
+import {
+  calculateReward,
+  getPointF,
+  logStatistics,
+  pprint,
+} from 'deep-learning/run-utils';
+
+import createPgNetwork from './createPgNetwork';
 
 const getPoint = getPointF(config);
 
@@ -71,18 +80,34 @@ export async function runEpisode(runModel, game, players) {
 }
 
 export async function runBatch(game, runModel) {
-  const batchData = objWithKeys(['actions', 'discountedRewards', 'negLogProbs']);
+  const batchKeys = ['actions', 'negLogProbs', 'discountedRewards'];
+  const batchData = objWithKeys(batchKeys);
   const players = [game.createPlayer('P1'), game.createPlayer('P2')];
 
   let episodeCount = 1;
 
   while (flatten(batchData.negLogProbs).length <= config.batchSize) {
     const episodeData = await runEpisode(runModel, game, players); //eslint-disable-line
-    ['negLogProbs', 'discountedRewards'].map(k =>
+    batchKeys.map(k =>
       batchData[k].push(episodeData[k]));
     episodeCount += 1;
     game.reset();
   }
 
   return { batchData, episodeCount };
+}
+
+export default async function train() {
+  let epoch = 0;
+  if (config.type === 'PG') {
+    while (epoch < config.numEpochs) {
+      const game = await createGame(resetState, config.fps); //eslint-disable-line
+      const PgNetwork = createPgNetwork(config);
+      const batch = await runBatch(game, PgNetwork.run); //eslint-disable-line
+      logStatistics(`games/epoch-${epoch}`, batch.batchData.actions);
+      PgNetwork.optimize(batch.batchData.gradients, batch.batchData.discountedRewards);
+      pprint({ epoch });
+      epoch += 1;
+    }
+  }
 }
