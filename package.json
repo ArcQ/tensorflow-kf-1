@@ -1,9 +1,9 @@
 {
   "scripts": {
     "pre-start": "cp ../kf-1/js/src/game/scenes/level-one/setup.js ./src/game/shared-resources/setup.js && cp -rf ../kf-game-engine/build/* ./lib/kf-game-engine/",
-    "start": "nodemon --ext .js --exec NODE_PATH=./src:./lib babel-node --expose-wasm src/index.js",
-    "start-game": "NODE_PATH=./src:./lib babel-node --expose-wasm src/game/index.js",
-    "test": "NODE_PATH=./src:./lib jest --watch",
+    "start": "nodemon --ext .js --exec NODE_PATH=./src: babel-node --expose-wasm src/index.js",
+    "start-game": "NODE_PATH=./src babel-node --expose-wasm src/game/index.js",
+    "test": "NODE_PATH=./src jest --watch",
     "lint": "eslint ./src"
   },
   "devDependencies": {
