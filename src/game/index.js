@@ -100,7 +100,7 @@ export async function createGame(resetState, fps) {
   const {
     nextTicks,
     createPlayer,
-    reset,
+    //reset,
     state,
   } = await startGame(resetState(), onTick, fps);
 
