@@ -2,3 +2,5 @@ node_modules
 tags
 lib
 src/game/wasm
+build
+data

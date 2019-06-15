@@ -1,3 +1,14 @@
-import train from 'deep-learning/policy-gradients';
+require("@babel/register")({
+  // This will override `node_modules` ignoring - you can alternatively pass
+  // an array of strings to be explicitly matched or a regex / glob
+  ignore: [],
+});
 
-train().then(() => console.info('done'));
+require('babel-polyfill');
+
+console.log();
+if (process.argv.slice(2)[0] === 'game') {
+  require ('./run/game.js');
+} else {
+  require('./run/train.js');
+}

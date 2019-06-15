@@ -1,7 +1,6 @@
 import * as tf from '@tensorflow/tfjs-node';
 
 import {
-  last,
   map,
   mapAccum,
   pipe,
@@ -106,8 +105,7 @@ export default function createPgNetwork({
           tf.mean(tf.mul(
             tf.concat(gradients),
             tf.concat(discountedEpisodeRewards),
-          )),
-        ));
+          ))));
     },
   };
 }

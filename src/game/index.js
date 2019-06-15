@@ -1,13 +1,15 @@
 import * as rp from 'request-promise';
+import { flatten } from 'flat';
 import { BehaviorSubject } from 'rxjs';
+import wasmBindgen from 'game/wasm/battle_rust';
 import {
   take,
   delay,
   toArray,
   tap,
 } from 'rxjs/operators';
-import encoder from 'kf-game-engine/encoder';
-import createWasmGame from 'kf-game-engine/wasm-game';
+import encoder from 'kf-utils/dist/wasm/encoder';
+import createWasmGame from 'kf-game-engine/dist/wasm-game';
 import { ZERO, getDistance } from 'deep-learning/run-utils';
 
 import setup from './shared-resources/setup';
@@ -45,17 +47,16 @@ function stateParser([{ ...state }, stateDiffByte]) {
   return state;
 }
 
+
 export async function startGame({ ...state }, onTick, fps) {
   const res = await rp.get('http://localhost:7000/gamemap/generate?x=9&y=16');
-  const wasmBindgen = await import('./wasm/battle_rust.js');
-  const wasm = await import('./wasm/battle_rust_bg.js');
 
   const gameStateSubject = new BehaviorSubject(state);
 
   const {
     wasmInterface,
   } = createWasmGame({
-    wasm,
+    globalOverride: global,
     wasmBindgen,
     onWasmStateChange: (stateDiff) => {
       const curState = gameStateSubject.value;
@@ -68,11 +69,16 @@ export async function startGame({ ...state }, onTick, fps) {
     wasmConfig: {
       name: 'LevelOne',
       encoderKeys,
-      initConfig: JSON.parse(res),
+      initConfig: flatten({
+        charEntities: state.charEntities,
+        map: {
+          matrix: JSON.parse(res).gameMap,
+          tileH: 65,
+          tileW: 65,
+        },
+      }, { safe: true }),
     },
   });
-
-  global.cljs_wasm_adapter = wasmInterface.fromWasm;
 
   const { onEvent, reset } = wasmInterface.toWasm;
 
