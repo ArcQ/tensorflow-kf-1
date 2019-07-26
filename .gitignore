@@ -1,6 +1,5 @@
-node_modules
-tags
-lib
-src/game/wasm
-build
-data
+tfjs/node_modules
+tfjs/lib
+tfjs/src/game/wasm
+tfjs/build
+tfjs/data
