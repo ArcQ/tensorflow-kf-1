@@ -40,7 +40,7 @@ export function discountAndNormalizeRewards(rewardsArr, gamma) {
     reverse,
     scan(
       (cumulative, episodeReward) =>
-        cumulative * gamma + episodeReward,
+      cumulative * gamma + episodeReward,
       0,
     ),
     tail,
@@ -62,7 +62,7 @@ export async function runEpisode(runModel, game, players) {
 
   while (!game.isEpisodeFinished()
     && episodeData.actions.length < config.maxEpisodeL) {
-game.state.P1.pos, game.state.P2.pos
+    game.state.P1.pos, game.state.P2.pos
     const { action, negLogProb } = runModel(
       tf.tensor2d([concat(game.state.P1.pos, game.state.P2.pos)]),
     );
