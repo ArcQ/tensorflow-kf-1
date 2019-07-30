@@ -8,9 +8,9 @@ import {
   toArray,
   tap,
 } from 'rxjs/operators';
-import encoder from 'kf-utils/dist/wasm/encoder';
-import createWasmGame from 'kf-game-engine/dist/wasm-game';
-import { ZERO, getDistance } from 'deep-learning/run-utils';
+import encoder from '@kf/game-utils/dist/wasm/encoder';
+import createWasmGame from '@kf/game-engine/dist/wasm-game';
+import { ZERO, getDistance } from 'utils/getDistance';
 
 import setup from './shared-resources/setup';
 
@@ -106,7 +106,7 @@ export async function createGame(resetState, fps) {
   const {
     nextTicks,
     createPlayer,
-    //reset,
+    reset,
     state,
   } = await startGame(resetState(), onTick, fps);
 
@@ -116,9 +116,8 @@ export async function createGame(resetState, fps) {
     nextTicks,
     createPlayer,
     reset() {
-      // this.state = resetState();
-      // reset(this.state);
-      // reset();
+      this.state = resetState();
+      reset(this.state);
     },
     state,
     isEpisodeFinished,

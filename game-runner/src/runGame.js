@@ -1,5 +1,6 @@
 // import * as rp from 'request-promise';
 import { startGame } from 'game';
+import {} from 'ipc/sockerServer';
 
 async function runGame() {
   const fps = 30;

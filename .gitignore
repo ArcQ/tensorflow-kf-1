@@ -1,5 +1,8 @@
-tfjs/node_modules
+node_modules
+tfjs/lib
 tfjs/lib
 tfjs/src/game/wasm
 tfjs/build
 tfjs/data
+venv/
+game-runner/src/game/wasm/*

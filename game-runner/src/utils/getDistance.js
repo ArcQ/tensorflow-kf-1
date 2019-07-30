@@ -2,7 +2,7 @@ import {
   range,
 } from 'ramda';
 
-import { calcDistance } from 'math';
+import { calcDistance } from './calcDistance';
 
 export const [ZERO, D1, D2, FAR] = range(0, 4);
 

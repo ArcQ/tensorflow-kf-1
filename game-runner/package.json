@@ -1,0 +1,42 @@
+{
+  "scripts": {
+    "pre-start": "cp ../../kf-1/js/src/scenes/level-one/setup.js ./src/game/shared-resources/setup.js",
+    "start": "nodemon --ext .js --exec  'NODE_PATH=./src NODE_PRESERVE_SYMLINKS=1 yarn node src/index.js'",
+    "start-game": "nodemon --ext .js --exec  'NODE_PATH=./game-runner NODE_PRESERVE_SYMLINKS=1 node game-runner/index.js game'",
+    "test": "NODE_PATH=./src jest --watch",
+    "lint": "eslint ./src"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.2.3",
+    "@babel/core": "^7.4.0",
+    "@babel/node": "^7.2.2",
+    "@babel/plugin-syntax-dynamic-import": "^7.2.0",
+    "@babel/preset-env": "^7.4.2",
+    "@babel/register": "^7.4.4",
+    "babel-eslint": "^10.0.1",
+    "babel-loader": "^8.0.6",
+    "eslint": "5.12.0",
+    "eslint-config-airbnb": "17.1.0",
+    "eslint-import-resolver-node": "^0.3.1",
+    "eslint-plugin-babel": "^4.1.1",
+    "eslint-plugin-emotion": "^10.0.7",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jest": "^22.3.0",
+    "eslint-plugin-jsx-a11y": "^6.1.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-react": "^7.11.0",
+    "jest": "^24.3.1"
+  },
+  "dependencies": {
+    "@tensorflow/tfjs-node": "^1.2.1",
+    "babel-jest": "^24.5.0",
+    "babel-polyfill": "^6.26.0",
+    "flat": "^4.1.0",
+    "mathjs": "^5.6.0",
+    "ramda": "^0.26.1",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "request-promise-native": "^1.0.5",
+    "uuid": "^3.3.2"
+  }
+}
