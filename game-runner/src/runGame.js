@@ -1,15 +1,29 @@
 // import * as rp from 'request-promise';
-import { startGame } from 'game';
-import {} from 'ipc/sockerServer';
+import { startGame } from 'gameManager/gameAdapter';
+import { resetState } from 'gameManager/resetState';
+import { listen } from 'ipc/socketServer';
+import config from 'config';
+
+function handleCmd(game, p1) {
+  return async function(cmd, resolve) {
+    const ticksToWait = config.fps * (config.reactionTime / 1000);
+    switch (cmd.type) {
+      case 'move':
+        p1.setPos([30, 30]);
+        break;
+      default:
+    }
+    const nextStates = await game.nextTicks(ticksToWait);
+    console.log(nextStates); //eslint-disable-line
+    resolve(nextStates);
+  };
+}
 
 async function runGame() {
   const fps = 30;
-  const getInitialGameState = () => ({});
-  const game = await startGame(getInitialGameState(), () => {}, fps);
+  const game = await startGame(resetState(), () => {}, fps);
   const p1 = game.createPlayer('P1');
-  p1.setPos([30, 30]);
-  const nextThreeStates = await game.nextTicks(3);
-  console.log(nextThreeStates);
+  listen('train_move', handleCmd(game, p1));
 }
 
-runGame().then(() => console.log('finished'));
+runGame().then();

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "pre-start": "cp ../../kf-1/js/src/scenes/level-one/setup.js ./src/game/shared-resources/setup.js",
+    "pre-start": "cp ../../kf-1/js/src/scenes/level-one/setup.js ./src/game/sharedResources/setup.js",
     "start": "nodemon --ext .js --exec  'NODE_PATH=./src NODE_PRESERVE_SYMLINKS=1 yarn node src/index.js'",
     "start-game": "nodemon --ext .js --exec  'NODE_PATH=./game-runner NODE_PRESERVE_SYMLINKS=1 node game-runner/index.js game'",
     "test": "NODE_PATH=./src jest --watch",

@@ -12,7 +12,7 @@ import encoder from '@kf/game-utils/dist/wasm/encoder';
 import createWasmGame from '@kf/game-engine/dist/wasm-game';
 import { ZERO, getDistance } from 'utils/getDistance';
 
-import setup from './shared-resources/setup';
+import setup from 'game/sharedResources/setup';
 
 const { encoderKeys, levelOneEncoder } = setup(encoder);
 
