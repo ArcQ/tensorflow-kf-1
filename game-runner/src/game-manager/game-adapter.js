@@ -10,7 +10,7 @@ import {
 } from 'rxjs/operators';
 import encoder from '@kf/game-utils/dist/wasm/encoder';
 import createWasmGame from '@kf/game-engine/dist/wasm-game';
-import { ZERO, getDistance } from 'utils/getDistance';
+import { ZERO, getDistance } from 'utils/get-distance';
 
 import setup from 'game/sharedResources/setup';
 
@@ -67,10 +67,9 @@ export async function startGame({ ...state }, onTick, fps) {
     },
     fps,
     wasmConfig: {
-      name: 'LevelOne',
       encoderKeys,
       initConfig: flatten({
-        charEntities: state.charEntities,
+        chars: state.chars,
         map: {
           matrix: JSON.parse(res).gameMap,
           tileH: 65,

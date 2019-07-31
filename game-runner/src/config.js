@@ -1,8 +1,8 @@
 import uuid from 'uuid/v1';
-import { getDivisions } from 'utils/getDivisions';
+import { getDivisions } from 'utils/get-divisions';
 
 const learningRate = 0.0001;
-const trainedScreenSizes = [[750, 1334]];
+const trainedScreenSize = [750, 1334];
 
 const quadrantDivisions = 3;
 
@@ -24,7 +24,7 @@ export default {
   type: 'PG',
   projectId: uuid(),
   learningRate,
-  screenSizes: trainedScreenSizes,
+  screenSize: trainedScreenSize,
   actionDistance: 10,
   numTrainingNets: 3,
   stateSize: getPosStateSize(),

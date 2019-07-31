@@ -38,7 +38,7 @@ export default function(encoder) {
   };
 
   const initialGameState = {
-    charEntities: getCombinedProps(charProps),
+    chars: getCombinedProps(charProps),
     moveTargetCircle: {
       isShow: false,
       pos: [100, 100],

@@ -1,19 +1,19 @@
 import config from 'config';
-import setRandPosF from 'utils/setRandPosF';
+import setRandPosF from 'utils/set-rand-pos-f';
 
 export const setRandPos = setRandPosF(config);
 
 export function resetState() {
   // TODO, state should include whether idle or moving, and if moving, point of movement
-  return {
+  const chars = {
     P1: {
-      pos: setRandPos(),
+      charK: 'assasin',
+      pos: setRandPos(config),
     },
     P2: {
-      pos: setRandPos(),
-    },
-    moveTargetCircle: {
-      pos: [0, 0],
+      charK: 'knight',
+      pos: setRandPos(config),
     },
   };
+  return { chars: { ...chars, keys: Object.keys(chars) } };
 }

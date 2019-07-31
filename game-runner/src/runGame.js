@@ -1,7 +1,7 @@
 // import * as rp from 'request-promise';
-import { startGame } from 'gameManager/gameAdapter';
-import { resetState } from 'gameManager/resetState';
-import { listen } from 'ipc/socketServer';
+import { startGame } from 'game-manager/game-adapter';
+import { resetState } from 'game-manager/reset-state';
+import { listen } from 'ipc/socket-server';
 import config from 'config';
 
 function handleCmd(game, p1) {
@@ -22,6 +22,7 @@ function handleCmd(game, p1) {
 async function runGame() {
   const fps = 30;
   const game = await startGame(resetState(), () => {}, fps);
+  console.log(resetState());
   const p1 = game.createPlayer('P1');
   listen('train_move', handleCmd(game, p1));
 }

@@ -7,6 +7,4 @@ require('@babel/register')({
 
 require('babel-polyfill');
 
-if (process.argv.slice(2)[0] === 'game') {
-  require('./runGame.js'); //eslint-disable-line
-}
+require('./runGame.js'); //eslint-disable-line
