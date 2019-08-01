@@ -1,3 +1,4 @@
+import * as fs from 'fs';
 import * as net from 'net';
 
 /* eslint-disable no-console */
@@ -17,9 +18,7 @@ export function listen(name, onEvent) {
       chunks.push(chunk);
       if (chunk.match(/\r\n$/)) {
         const cmd = JSON.parse(chunks.join(''));
-        const runAction = new Promise(resolve => onEvent(cmd, resolve));
-        runAction()
-          .then(res => client.write(JSON.stringify(res)));
+        onEvent(cmd).then(res => client.write(JSON.stringify(res)));
         // client.write(JSON.stringify({ pong: ping }));
       }
     });
@@ -28,7 +27,13 @@ export function listen(name, onEvent) {
   server.on('listening', () => {
     console.log('Server listening');
   });
-  server.listen(`/tmp/ipc-${name}.sock`);
+
+  const filePath = `./ipc-${name}.sock`;
+  try {
+    fs.unlinkSync(filePath);
+  } catch (e) { /* new file */ }
+
+  server.listen(filePath);
 }
 
 /* eslint-disable no-console */

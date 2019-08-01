@@ -1,7 +1,8 @@
 import 'babel-polyfill';
 import * as rp from 'request-promise';
-import { resetState } from 'deep-learning/helpers';
-import { startGame } from './index';
+import { resetState } from './reset-state';
+
+import { startGame } from './game-adapter';
 
 jest.mock('request-promise');
 

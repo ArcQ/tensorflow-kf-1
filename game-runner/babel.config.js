@@ -10,13 +10,8 @@ module.exports = {
   ],
   include: [
     'src',
-    'node_modules/@kf/game-utils',
-    'node_modules/@kf/game-engine',
+    'node_modules/@kf',
   ],
-  // transformIgnorePatterns: [
-  //   // Change MODULE_NAME_HERE to your module that isn't being compiled
-  //   '/node_modules/(?!MODULE_NAME_HERE).+\\.js$'
-  // ],
   plugins: [
     '@babel/plugin-syntax-dynamic-import',
   ],

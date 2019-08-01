@@ -58,6 +58,7 @@ export async function startGame({ ...state }, onTick, fps) {
   } = createWasmGame({
     globalOverride: global,
     wasmBindgen,
+    broadcastUnchanged: true,
     onWasmStateChange: (stateDiff) => {
       const curState = gameStateSubject.value;
       const stateObj = [curState, stateDiff];
