@@ -10,7 +10,6 @@ import {
 } from 'rxjs/operators';
 import encoder from '@kf/game-utils/dist/wasm/encoder';
 import createWasmGame from '@kf/game-engine/dist/wasm-game';
-import { ZERO, getDistance } from 'utils/get-distance';
 
 import setup from 'game/sharedResources/setup';
 
@@ -25,13 +24,13 @@ export const newPlayer = (k, onEvent) => ({
   ]),
 });
 
-function stateParser([{ ...state }, stateDiffByte]) {
+function stateParser([state, stateDiffByte]) {
   const spritePosOnChange = {
     P1: (pos) => {
-      state.P1.pos = pos;
+      state.chars.P1.pos = pos;
     },
     P2: (pos) => {
-      state.P2.pos = pos;
+      state.chars.P2.pos = pos;
     },
   };
   const stateUpdateHandler = {
@@ -101,7 +100,7 @@ export async function startGame({ ...state }, onTick, fps) {
   };
 }
 
-export async function createGame(resetState, fps) {
+export async function createGame(resetState, fps, isEpisodeFinished) {
   const onTick = () => {};
   const {
     nextTicks,
@@ -109,8 +108,6 @@ export async function createGame(resetState, fps) {
     reset,
     state,
   } = await startGame(resetState(), onTick, fps);
-
-  const isEpisodeFinished = () => getDistance(state.P1.pos, state.P2.pos) === ZERO;
 
   return {
     nextTicks,

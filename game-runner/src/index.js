@@ -7,4 +7,6 @@ require('@babel/register')({
 
 require('babel-polyfill');
 
-require('./runGame.js'); //eslint-disable-line
+const mod = require('./run-game.js'); //eslint-disable-line
+
+mod.runGame().then();
