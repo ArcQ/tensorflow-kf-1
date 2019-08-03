@@ -6,3 +6,4 @@ tfjs/build
 tfjs/data
 venv/
 game-runner/src/game/wasm/*
+__pycache__

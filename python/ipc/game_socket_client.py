@@ -26,8 +26,9 @@ class GameSocketClient:
     async def send_msg(self, msg):
         encoded_msg = json.dumps(msg).encode('UTF-8')
         self.writer.write(encoded_msg)
-        self.writer.write(b"\r\n")
+        self.writer.write(b"\n")
         result = await self.reader.readline()
+        print(json.loads(result))
         return result
 
     async def close(self):

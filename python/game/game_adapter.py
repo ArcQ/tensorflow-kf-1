@@ -10,7 +10,6 @@ class GameAdapter:
     @staticmethod
     async def create(name):
         socket = await GameSocketClient.create(name)
-        print(socket)
         return GameAdapter(name, socket)
 
     async def send_move(self, pos):
@@ -24,4 +23,4 @@ class GameAdapter:
 
     async def reset(self):
         msg = json.dumps({"type": "reset"})
-        await self.socket.send_msg(msg)
+        self.socket.send_msg(msg)

@@ -1,11 +1,44 @@
 import * as fs from 'fs';
 import * as net from 'net';
+import { pipe, curry } from 'ramda';
+
+function createResponse(payload) {
+  return JSON.stringify({ type: 'cmdResponse', payload });
+}
+
+function parseChunks(chunks) {
+  return JSON.parse(JSON.parse(chunks.join('')));
+}
+
+function runMiddleware(chunks, res, middleware = []) {
+  return pipe(
+    parseChunks,
+    ...middleware.map(m => curry(m)(res)),
+  )(chunks);
+}
+
+function getResponseObj(client) {
+  return {
+    send: (response) => {
+      client.write(createResponse(response));
+      client.write('\n');
+    },
+  };
+}
 
 /* eslint-disable no-console */
+/**
+ * listen
+ *
+ * @param name
+ * @param middleware
+ * @returns {undefined}
+ */
+export function listen(name, middleware = []) {
+  if (middleware.length === 0) return;
 
-export function listen(name, onEvent) {
   const server = net.createServer((client) => {
-    const chunks = [];
+    let chunks = [];
     console.log('client connected');
     client.setEncoding('utf8');
 
@@ -14,12 +47,14 @@ export function listen(name, onEvent) {
     });
 
     client.on('data', (chunk) => {
-      // console.log(`Got data: ${chunk}`);
       chunks.push(chunk);
-      if (chunk.match(/\r\n$/)) {
-        const cmd = JSON.parse(chunks.join(''));
-        onEvent(cmd).then(res => client.write(JSON.stringify(res)));
-        // client.write(JSON.stringify({ pong: ping }));
+      if (chunk.match(/\n$/)) {
+        runMiddleware(
+          chunks,
+          getResponseObj(client),
+          middleware,
+        );
+        chunks = [];
       }
     });
   });

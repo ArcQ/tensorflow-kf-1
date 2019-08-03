@@ -7,10 +7,17 @@ import api from 'api';
 export async function runGame(noServer) {
   const fps = 30;
   const game = await startGame(resetState(), () => {}, fps);
-  const p1 = game.createPlayer('P1');
+  const P1 = game.createPlayer('P1');
+  const handleCmd = api.handleCmd(game, { P1 });
   if (noServer) {
-    return api.handleCmd(game, p1);
+    return handleCmd;
   }
-  listen('train_move', api.handleCmd(game, p1));
+
+  const mainHandler = (res, req) => handleCmd(req)
+    .then(data => res.send(data));
+
+  const middleware = [mainHandler];
+
+  listen('train_move', middleware);
   return true;
 }
