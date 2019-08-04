@@ -6,7 +6,10 @@ export default (extend) => {
       return async function(cmd) {
         const ticksToWait = config.fps * (config.reactionTime / 1000);
         try {
-          api[cmd.type](game, props, cmd);
+          const cmdHandler = api[cmd.type];
+          if (cmdHandler) {
+            cmdHandler(game, props, cmd);
+          }
           const nextStates = await game.nextTicks(ticksToWait);
           console.log(nextStates);
           return nextStates;

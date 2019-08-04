@@ -88,7 +88,7 @@ export async function startGame({ ...state }, onTick, fps) {
     nextTicks: (n) => {
       // can toPromise, subsribe, apply operators etc.
       const p = gameStateSubject.pipe(
-        delay(5),
+        // delay(5),
         tap(() => wasmInterface.toWasm.onTick(60 / (fps * 1000))),
         take(n),
         toArray(),

@@ -4,7 +4,14 @@ from game.game_adapter import GameAdapter
 
 async def run():
     adapter = await GameAdapter.create("train_move")
-    await adapter.send_move([100, 100])
+    result = await adapter.move([100, 100])
+    print(result)
+
+    for _ in range(5):
+        # await asyncio.sleep(1)
+        result = await adapter.no_action()
+        print(result)
+
     return 'done'
 
 
