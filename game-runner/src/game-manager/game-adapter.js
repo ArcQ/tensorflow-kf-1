@@ -1,9 +1,11 @@
 import * as rp from 'request-promise';
 import { flatten } from 'flat';
 import { BehaviorSubject } from 'rxjs';
+import { clone } from 'ramda';
 import wasmBindgen from 'game/wasm/battle_rust';
 import {
   take,
+  map,
   delay,
   toArray,
   tap,
@@ -47,7 +49,7 @@ function stateParser([state, stateDiffByte]) {
 }
 
 
-export async function startGame({ ...state }, onTick, fps) {
+export async function startGame({ ...state }, onUpdateState, fps) {
   const res = await rp.get('http://localhost:7000/gamemap/generate?x=9&y=16');
 
   const gameStateSubject = new BehaviorSubject(state);
@@ -61,7 +63,7 @@ export async function startGame({ ...state }, onTick, fps) {
     onWasmStateChange: (stateDiff) => {
       const curState = gameStateSubject.value;
       const stateObj = [curState, stateDiff];
-      onTick(stateObj);
+      onUpdateState(stateObj);
       const nextState = stateParser(stateObj);
       gameStateSubject.next(nextState);
     },
@@ -88,35 +90,15 @@ export async function startGame({ ...state }, onTick, fps) {
       // can toPromise, subsribe, apply operators etc.
       const p = gameStateSubject.pipe(
         delay(5),
-        tap(() => wasmInterface.toWasm.onTick(60 / (fps * 1000))),
+        tap(() => wasmInterface.toWasm.onTick(1 / fps)),
+        map(clone),
         take(n),
         toArray(),
       ).toPromise();
 
-      wasmInterface.toWasm.onTick(60 / (fps * 1000));
+      wasmInterface.toWasm.onTick(1 / fps);
       return p;
     },
     reset,
-  };
-}
-
-export async function createGame(resetState, fps, isEpisodeFinished) {
-  const onTick = () => {};
-  const {
-    nextTicks,
-    createPlayer,
-    reset,
-    state,
-  } = await startGame(resetState(), onTick, fps);
-
-  return {
-    nextTicks,
-    createPlayer,
-    reset() {
-      this.state = resetState();
-      reset(this.state);
-    },
-    state,
-    isEpisodeFinished,
   };
 }

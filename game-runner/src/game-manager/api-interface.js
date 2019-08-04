@@ -8,6 +8,7 @@ export default (extend) => {
         try {
           api[cmd.type](game, props, cmd);
           const nextStates = await game.nextTicks(ticksToWait);
+          console.log(nextStates);
           return nextStates;
         } catch (e) {
           console.warn('unable to handle cmd');

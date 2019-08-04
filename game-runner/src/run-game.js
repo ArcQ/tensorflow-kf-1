@@ -6,7 +6,8 @@ import api from 'api';
 
 export async function runGame(noServer) {
   const fps = 30;
-  const game = await startGame(resetState(), () => {}, fps);
+  const initialState = resetState();
+  const game = await startGame(initialState, (v) => {}, fps);
   const P1 = game.createPlayer('P1');
   const handleCmd = api.handleCmd(game, { P1 });
   if (noServer) {

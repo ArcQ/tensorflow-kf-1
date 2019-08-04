@@ -28,7 +28,8 @@ class GameSocketClient:
         self.writer.write(encoded_msg)
         self.writer.write(b"\n")
         result = await self.reader.readline()
-        print(json.loads(result))
+        # print(json.loads(result)['payload'])
+        print([s['chars']['P1']['pos'] for s in json.loads(result)['payload']])
         return result
 
     async def close(self):
