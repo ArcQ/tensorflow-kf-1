@@ -23,12 +23,16 @@ class GameSocketClient:
     def get_socket_name(name):
         return '../game-runner/ipc-' + name + '.sock'
 
-    async def send_msg(self, msg):
+    def build_msg(self, msg):
+        msg["payload"] = {**msg["payload"], **{"name": self.name}}
         encoded_msg = json.dumps(msg).encode('UTF-8')
+        return encoded_msg
+
+    async def send_msg(self, msg):
+        encoded_msg = self.build_msg(msg)
         self.writer.write(encoded_msg)
         self.writer.write(b"\n")
         result = await self.reader.readline()
-        # print(json.loads(result)['payload'])
         print([s['chars']['P1']['pos'] for s in json.loads(result)['payload']])
         return result
 

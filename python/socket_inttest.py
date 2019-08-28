@@ -8,7 +8,6 @@ async def run():
     print(result)
 
     for _ in range(5):
-        # await asyncio.sleep(1)
         result = await adapter.no_action()
         print(result)
 

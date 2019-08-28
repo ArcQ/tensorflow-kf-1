@@ -10,6 +10,10 @@ class GameAdapter:
     @staticmethod
     async def create(name):
         socket = await GameSocketClient.create(name)
+        msg = json.dumps({
+            "type": "create",
+        })
+        socket.send_msg(msg)
         return GameAdapter(name, socket)
 
     async def move(self, pos):
@@ -19,20 +23,23 @@ class GameAdapter:
                 "pos": pos
             }
         })
-        await self.socket.send_msg(msg)
+        return await self.socket.send_msg(msg)
 
     async def no_action(self):
         msg = json.dumps({
             "type": "no_action",
         })
-        await self.socket.send_msg(msg)
+        return await self.socket.send_msg(msg)
 
     async def stop(self):
         msg = json.dumps({
             "type": "stop",
         })
-        await self.socket.send_msg(msg)
+        return await self.socket.send_msg(msg)
 
     async def reset(self):
         msg = json.dumps({"type": "reset"})
-        self.socket.send_msg(msg)
+        return await self.socket.send_msg(msg)
+
+    async def close(self):
+        self.socket.close()

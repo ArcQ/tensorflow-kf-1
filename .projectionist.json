@@ -1,0 +1,8 @@
+{
+  "python/*.py": {
+    "alternate": "python/test/{}_test.py"
+  },
+  "python/test/*_test.clj": {
+    "alternate": "python/src/{}.py"
+  }
+}
