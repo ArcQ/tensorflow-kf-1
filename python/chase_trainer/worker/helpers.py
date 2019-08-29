@@ -1,4 +1,5 @@
 import math
+import statistics
 import numpy as np
 
 [ZERO, D1, D2, FAR] = range(4)
@@ -48,11 +49,13 @@ def calc_reward(new_states):
     rewards = []
     done = False
     for new_state in new_states:
-        [pt1, pt2] = [np.array(char_state.pos)
-                      for char_k, char_state in new_state["chars"].values()]
+        [pt1, pt2] = [np.array(char_state['pos'])
+                      for char_state in new_state["chars"].values()]
         dist_type = get_distance(pt1, pt2)
         rewards.append(REWARD_DICT[dist_type])
         if dist_type == ZERO:
             done = True
 
-    return rewards, done
+    mean_reward = statistics.mean(rewards)
+
+    return mean_reward, done

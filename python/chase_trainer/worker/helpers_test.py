@@ -17,11 +17,11 @@ def test_get_distance():
 
 
 def test_convert_action_to_pos():
-    assert convert_action_to_pos(np.array([150, 150])) == FAR
+    assert convert_action_to_pos(np.array([150, 150]), 7, get_config()) == FAR
 
 
 def test_calc_reward():
-    new_states = [
+    new_states = [{ "chars": state } for state in [
         {
             "P1": {"pos": [100, 100]},
             "P2": {"pos": [200, 200]},
@@ -33,8 +33,8 @@ def test_calc_reward():
         {
             "P1": {"pos": [200, 190]},
             "P2": {"pos": [200, 200]},
-        }]
+        }]]
 
-    reward = calc_reward(new_states)
+    reward, done = calc_reward(new_states)
 
-    assert reward.toFixed(2) == '648.33'
+    assert round(reward, 2) == 140.67
