@@ -1,14 +1,16 @@
 from queue import Queue
 from game.game_adapter import GameAdapter
 
-def get_random_model(max_eps):
+
+def build_random_model(max_eps):
     return {
         "max_eps": max_eps,
         "global_moving_average_reward": 0,
         "res_queue": Queue(),
     }
 
-def run(random_model):
+
+def run_random_model(random_model):
     reward_avg = 0
     global_moving_average_reward = 0
     game_adapter = GameAdapter()
@@ -23,10 +25,10 @@ def run(random_model):
             reward_sum += reward
             # Record statistics
         global_moving_average_reward = record(episode,
-                                                   reward_sum,
-                                                   0,
-                                                   global_moving_average_reward,
-                                                   res_queue, 0, steps)
+                                              reward_sum,
+                                              0,
+                                              global_moving_average_reward,
+                                              res_queue, 0, steps)
 
         reward_avg += reward_sum
     final_avg = reward_avg / float(max_episodes)

@@ -1,11 +1,18 @@
 import os
+import json
 from matplotlib import pyplot as plt
 from chase_trainer.config import get_config
 
 
+def import_global_config():
+    config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '../../config', 'config.json')
+    with open(config_path) as f:
+        return json.load(f)
+
+
 def get_save_dir():
     config_obj = get_config()
-    return '/data/' + config_obj['name']
+    return 'chase_trainer/data/' + config_obj['name']
 
 
 def create_save_dir():

@@ -1,9 +1,10 @@
-from tensorflow.keras.layers import Dense, Input
-from tensorflow.keras.models import Model
 from chase_trainer.config import get_config
 
 
-def get_ac_model():
+def build_ac_model():
+    from tensorflow.keras.models import Model
+    from tensorflow.keras.layers import Dense, Input
+
     action_size = get_config()['action_size']
     state_size = get_config()['state_size']
 
@@ -16,7 +17,3 @@ def get_ac_model():
     critic_values = Dense(1, name='critic_values')(critic_dense)
 
     return Model(inputs=[input_layer], outputs=[actor_logits, critic_values])
-
-
-def run_ac_model(ac_model, inputs):
-    return ac_model(inputs)

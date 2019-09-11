@@ -1,6 +1,4 @@
 import numpy as np
-import tensorflow as tf
-import tensorflow.keras.layers as kl
 
 LEARNING_RATE = 0.0001
 TRAINED_SCREEN_SIZES = [[750, 1334]]
@@ -33,7 +31,7 @@ def get_config():
         "algorithm": 'a3c',
         "learning_rate": LEARNING_RATE,
         "screen_sizes": TRAINED_SCREEN_SIZES,
-        "action_distance": 10,
+        "action_distance": 5,
         "num_training_nets": 3,
         "state_size": get_pos_state_size(),
         "action_size": get_action_size(),

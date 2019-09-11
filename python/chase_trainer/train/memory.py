@@ -13,3 +13,6 @@ class Memory:
         self.states = []
         self.actions = []
         self.rewards = []
+
+    def cur_step(self):
+        return len(self.states)
